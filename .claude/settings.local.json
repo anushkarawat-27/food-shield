@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p ingestion/sources db/migrations simulator optimizer api/routes api/services agent web infra)",
+      "Bash(git init *)"
+    ]
+  }
+}

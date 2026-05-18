@@ -1,0 +1,76 @@
+services:
+  db:
+    image: timescale/timescaledb-ha:pg16
+    container_name: foodshield_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-foodshield}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-foodshield_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-foodshield}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - foodshield_pgdata:/home/postgres/pgdata/data
+      - ../db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-foodshield}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: foodshield_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/api.Dockerfile
+    container_name: foodshield_api
+    env_file:
+      - ../.env
+    environment:
+      # Override .env so the api talks to the compose services, not host localhost.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-foodshield}:${POSTGRES_PASSWORD:-foodshield_dev}@db:5432/${POSTGRES_DB:-foodshield}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ../api:/app/api
+      - ../ingestion:/app/ingestion
+      - ../simulator:/app/simulator
+      - ../optimizer:/app/optimizer
+      - ../agent:/app/agent
+      - ../scripts:/app/scripts
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/web.Dockerfile
+    container_name: foodshield_web
+    env_file:
+      - ../.env
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    volumes:
+      - ../web:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - api
+    command: npm run dev
+
+volumes:
+  foodshield_pgdata:
