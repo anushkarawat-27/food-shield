@@ -64,31 +64,86 @@ def _try_db_corpus() -> pd.DataFrame | None:
         with cursor() as cur:
             cur.execute("SELECT COUNT(*) AS n FROM disruptor_events")
             n_events = cur.fetchone()["n"]
-            cur.execute(
-                "SELECT to_regclass('public.ipc_observations') IS NOT NULL AS ok"
-            )
+            cur.execute("SELECT to_regclass('public.ipc_observations') IS NOT NULL AS ok")
             has_labels = bool(cur.fetchone()["ok"])
+            if not has_labels:
+                print("[db] ipc_observations table missing; using synthetic", file=sys.stderr)
+                return None
+            cur.execute("SELECT COUNT(*) AS n FROM ipc_observations")
+            n_labels = cur.fetchone()["n"]
     except Exception as e:
         print(f"[db] unreachable ({e}); falling back to synthetic", file=sys.stderr)
         return None
 
-    if n_events == 0 or not has_labels:
+    # Need both upstream events and labels in non-trivial quantity to learn
+    # generalizable patterns; otherwise synthetic gives more reliable models.
+    if n_events < 500 or n_labels < 200:
         print(
-            f"[db] events={n_events} ipc_observations={has_labels} — "
-            "insufficient for supervised training, falling back to synthetic",
+            f"[db] events={n_events} labels={n_labels} — corpus too small, "
+            "using synthetic instead",
             file=sys.stderr,
         )
         return None
 
-    # Future: real implementation when FEWS NET ingestion lands.
-    # Schema sketch:
-    #   ipc_observations(region_id, observed_at, ipc_phase)
-    # Features: spatial-join events to regions, aggregate severity in each
-    # window ending at observed_at − horizon, join poverty + yield trend.
-    raise NotImplementedError(
-        "DB-mode corpus builder not implemented yet — wire after FEWS NET "
-        "ingestion populates ipc_observations."
-    )
+    # ------------------------------------------------------------------
+    # Build a row per (region, observation, horizon).
+    # Features: rolling-window mean severity per disruptor over 30/90/180 days
+    # ending at the observation's period_start MINUS the horizon (the moment
+    # at which the projector would have to make a forecast).
+    # Target: IPC phase observed at period_start.
+    # ------------------------------------------------------------------
+    rows: list[dict] = []
+    with cursor() as cur:
+        cur.execute(
+            """
+            SELECT o.region_id, o.period_start, o.ipc_phase,
+                   COALESCE(r.poverty_pct, 30.0) AS poverty_pct
+            FROM ipc_observations o
+            JOIN regions r ON r.id = o.region_id
+            WHERE o.period_kind = 'CS'
+            """
+        )
+        observations = list(cur.fetchall())
+
+        for obs in observations:
+            rid = obs["region_id"]
+            t0 = obs["period_start"]
+            for h in HORIZONS:
+                feature_time = t0 - timedelta(days=30 * h)
+                feats: dict[str, float] = {}
+                # Mean severity per (disruptor, window) ending at feature_time.
+                cur.execute(
+                    """
+                    SELECT disruptor_type,
+                           AVG(severity) FILTER (WHERE started_at >= %s - INTERVAL '30 days')  AS w30,
+                           AVG(severity) FILTER (WHERE started_at >= %s - INTERVAL '90 days')  AS w90,
+                           AVG(severity) FILTER (WHERE started_at >= %s - INTERVAL '180 days') AS w180
+                    FROM disruptor_events e
+                    JOIN regions r2 ON ST_Intersects(r2.geom, e.geom)
+                    WHERE r2.id = %s AND e.started_at <= %s
+                    GROUP BY disruptor_type
+                    """,
+                    (feature_time, feature_time, feature_time, rid, feature_time),
+                )
+                window_rows = {r["disruptor_type"]: r for r in cur.fetchall()}
+                for d in DISRUPTORS:
+                    wr = window_rows.get(d, {})
+                    for w_name, w_col in (("30d", "w30"), ("90d", "w90"), ("180d", "w180")):
+                        feats[f"sev_{d}_{w_name}"] = float(wr.get(w_col) or 0.0)
+
+                doy = t0.timetuple().tm_yday
+                feats["poverty_pct"] = float(obs["poverty_pct"])
+                feats["yield_trend"] = 0.0  # plug yield_baseline slope here when populated
+                feats["season_cos"] = math.cos(2 * math.pi * doy / 365.25)
+                feats["season_sin"] = math.sin(2 * math.pi * doy / 365.25)
+
+                rows.append({"region_id": rid, "snapshot_date": t0, "horizon_months": h,
+                             "ipc_phase": float(obs["ipc_phase"]), **feats})
+
+    if not rows:
+        print("[db] joined corpus came back empty; falling back to synthetic", file=sys.stderr)
+        return None
+    return pd.DataFrame(rows)
 
 
 def _synthetic_corpus(

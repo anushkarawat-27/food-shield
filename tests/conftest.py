@@ -54,10 +54,13 @@ def fake_cursor(monkeypatch):
         import optimizer.allocator
         import simulator.projector
         import api.routes.export
+        import agent.monitor
         monkeypatch.setattr(api.db, "cursor", fake_cm)
         monkeypatch.setattr(simulator.impact, "cursor", fake_cm)
         monkeypatch.setattr(optimizer.allocator, "cursor", fake_cm)
         monkeypatch.setattr(api.routes.export, "cursor", fake_cm)
+        monkeypatch.setattr(agent.monitor, "cursor", fake_cm)
+        monkeypatch.setattr(simulator.projector, "_poverty_lookup", lambda ids: {})
         return cur
 
     return build

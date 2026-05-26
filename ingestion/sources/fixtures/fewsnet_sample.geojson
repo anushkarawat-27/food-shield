@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "name": "fewsnet_ipc_horn_of_africa_2017_06",
+  "_comment": "Bundled fallback fixture: 2017 Horn-of-Africa IPC classifications used when fews.net is unreachable. Polygons are coarse bounding boxes around each admin-1 unit — enough for ST_Intersects spatial joins against regions(geom). Replace with the real FEWS NET shapefile in production.",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"country": "Somalia", "admin": "Bay",            "ipc_phase": 4, "period_kind": "CS",  "period_start": "2017-06-01", "period_end": "2017-09-30"},
+      "geometry": {"type": "Polygon", "coordinates": [[[42.5,1.5],[44.5,1.5],[44.5,4.0],[42.5,4.0],[42.5,1.5]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"country": "Somalia", "admin": "Bakool",         "ipc_phase": 4, "period_kind": "CS",  "period_start": "2017-06-01", "period_end": "2017-09-30"},
+      "geometry": {"type": "Polygon", "coordinates": [[[43.0,3.5],[45.0,3.5],[45.0,5.5],[43.0,5.5],[43.0,3.5]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"country": "Somalia", "admin": "Lower Shabelle", "ipc_phase": 3, "period_kind": "CS",  "period_start": "2017-06-01", "period_end": "2017-09-30"},
+      "geometry": {"type": "Polygon", "coordinates": [[[44.0,0.5],[46.0,0.5],[46.0,2.5],[44.0,2.5],[44.0,0.5]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"country": "Somalia", "admin": "Mudug",          "ipc_phase": 4, "period_kind": "CS",  "period_start": "2017-06-01", "period_end": "2017-09-30"},
+      "geometry": {"type": "Polygon", "coordinates": [[[46.0,5.5],[49.5,5.5],[49.5,8.0],[46.0,8.0],[46.0,5.5]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"country": "Somalia", "admin": "Sool",           "ipc_phase": 3, "period_kind": "CS",  "period_start": "2017-06-01", "period_end": "2017-09-30"},
+      "geometry": {"type": "Polygon", "coordinates": [[[45.5,8.0],[49.0,8.0],[49.0,10.5],[45.5,10.5],[45.5,8.0]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"country": "Somalia", "admin": "Banadir",        "ipc_phase": 3, "period_kind": "CS",  "period_start": "2017-06-01", "period_end": "2017-09-30"},
+      "geometry": {"type": "Polygon", "coordinates": [[[45.2,1.9],[45.5,1.9],[45.5,2.2],[45.2,2.2],[45.2,1.9]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"country": "Ethiopia","admin": "Somali Region",  "ipc_phase": 3, "period_kind": "CS",  "period_start": "2017-06-01", "period_end": "2017-09-30"},
+      "geometry": {"type": "Polygon", "coordinates": [[[40.0,4.0],[45.0,4.0],[45.0,11.0],[40.0,11.0],[40.0,4.0]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"country": "Kenya",   "admin": "Turkana",        "ipc_phase": 3, "period_kind": "CS",  "period_start": "2017-06-01", "period_end": "2017-09-30"},
+      "geometry": {"type": "Polygon", "coordinates": [[[34.5,2.0],[36.5,2.0],[36.5,5.0],[34.5,5.0],[34.5,2.0]]]}
+    }
+  ]
+}
