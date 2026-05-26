@@ -20,12 +20,15 @@ class Allocation(BaseModel):
     from_depot: str
     cost_usd: float
     coverage_pct: float
+    priority_weight: float | None = None
 
 
 class RecommendResponse(BaseModel):
     allocations: list[Allocation]
     unmet_demand_tonnes: float
     total_cost_usd: float
+    skipped_conflict_regions: list[int] = []
+    objective_value: float | None = None
 
 
 @router.post("", response_model=RecommendResponse)
@@ -41,4 +44,6 @@ def recommend(req: RecommendRequest) -> RecommendResponse:
         allocations=[Allocation(**a) for a in result["allocations"]],
         unmet_demand_tonnes=result["unmet_demand_tonnes"],
         total_cost_usd=result["total_cost_usd"],
+        skipped_conflict_regions=result.get("skipped_conflict_regions", []),
+        objective_value=result.get("objective_value"),
     )

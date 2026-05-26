@@ -1,0 +1,66 @@
+{
+  "trained_at": "2026-05-26T20:05:12.038973+00:00",
+  "source": "synthetic",
+  "n_rows": 36000,
+  "horizons": [
+    3,
+    6,
+    12
+  ],
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "feature_cols": [
+    "sev_drought_30d",
+    "sev_drought_90d",
+    "sev_drought_180d",
+    "sev_flood_30d",
+    "sev_flood_90d",
+    "sev_flood_180d",
+    "sev_heat_30d",
+    "sev_heat_90d",
+    "sev_heat_180d",
+    "sev_pest_30d",
+    "sev_pest_90d",
+    "sev_pest_180d",
+    "sev_frost_30d",
+    "sev_frost_90d",
+    "sev_frost_180d",
+    "poverty_pct",
+    "yield_trend",
+    "season_cos",
+    "season_sin"
+  ],
+  "metrics": {
+    "h3_q10": {
+      "val_mae": 0.17677225172519684
+    },
+    "h3_q50": {
+      "val_mae": 0.11685337126255035
+    },
+    "h3_q90": {
+      "val_mae": 0.186550110578537
+    },
+    "h6_q10": {
+      "val_mae": 0.25868046283721924
+    },
+    "h6_q50": {
+      "val_mae": 0.17631274461746216
+    },
+    "h6_q90": {
+      "val_mae": 0.28057608008384705
+    },
+    "h12_q10": {
+      "val_mae": 0.45523011684417725
+    },
+    "h12_q50": {
+      "val_mae": 0.2945467531681061
+    },
+    "h12_q90": {
+      "val_mae": 0.45926666259765625
+    }
+  },
+  "notes": "Synthetic corpus calibrated to impact-model physics; replace with FEWS NET-labeled DB corpus once ipc_observations is populated."
+}

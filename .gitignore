@@ -12,6 +12,7 @@ dist/
 build/
 *.pkl
 *.joblib
+!models/*.joblib
 mlruns/
 data/raw/
 data/cache/

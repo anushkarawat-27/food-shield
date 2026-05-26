@@ -96,6 +96,37 @@ export default function AllocationPanel() {
         {loading ? "Optimizing..." : "Run allocation"}
       </button>
 
+      <button
+        onClick={async () => {
+          if (!hasScenario) return;
+          const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          const res = await fetch(`${apiBase}/export/policy`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              scenario,
+              total_tonnage: tonnage,
+              total_budget_usd: budget,
+              priority_population_groups: [],
+              avoid_conflict_zones: avoidConflict,
+              filename: `foodshield_policy_${new Date().toISOString().slice(0, 10)}.csv`,
+            }),
+          });
+          if (!res.ok) return;
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `foodshield_policy_${new Date().toISOString().slice(0, 10)}.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }}
+        disabled={!hasScenario || !result}
+        className="w-full border border-white/20 hover:bg-white/10 disabled:opacity-40 text-xs rounded px-3 py-2"
+      >
+        Export policy CSV
+      </button>
+
       {!hasScenario && (
         <div className="text-xs opacity-50">
           Move disruptor sliders on at least one region first.

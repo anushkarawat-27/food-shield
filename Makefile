@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 COMPOSE := docker compose -f infra/docker-compose.yml --env-file .env
 
-.PHONY: env up down logs ps migrate seed ingest api web fmt
+.PHONY: env up down logs ps migrate seed ingest api web fmt test train backtest
 
 env:
 	@[ -f .env ] || (cp .env.example .env && echo "created .env — fill in API keys")
@@ -40,3 +40,13 @@ web:
 
 fmt:
 	$(COMPOSE) exec api ruff format api ingestion simulator optimizer agent || true
+
+# --- Local (no-docker) targets — run inside .venv ---
+test:
+	python -m pytest tests/ -v
+
+train:
+	python -m simulator.train_projector
+
+backtest:
+	python -m scripts.backtest

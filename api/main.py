@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import events, recommend, regions, simulate, project, scenarios
+from api.routes import events, recommend, regions, simulate, project, scenarios, export
 
 app = FastAPI(title="FoodShield API", version="0.1.0")
 
@@ -24,3 +24,4 @@ app.include_router(project.router)
 app.include_router(recommend.router)
 app.include_router(scenarios.router)
 app.include_router(events.router)
+app.include_router(export.router)
