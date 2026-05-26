@@ -59,7 +59,10 @@ pip install -r requirements.txt
 make train        # trains XGBoost quantile projectors → models/
 make test         # 27 unit tests, all run offline
 make backtest     # writes docs/backtest_2017_somalia.md
+make demo         # full simulate → project → recommend → export walk-through
 ```
+
+See [`docs/dashboard.md`](docs/dashboard.md) for the UI guide and [`scripts/README.md`](scripts/README.md) for the bootstrap-and-ingest order.
 
 ## API keys
 

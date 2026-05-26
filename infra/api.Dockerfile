@@ -19,6 +19,10 @@ COPY simulator /app/simulator
 COPY optimizer /app/optimizer
 COPY agent /app/agent
 COPY scripts /app/scripts
+# Trained projector artifacts — committed under models/ so the container
+# can serve forecasts without retraining on first boot. Re-train with
+# `python -m simulator.train_projector` to overwrite.
+COPY models /app/models
 
 ENV PYTHONPATH=/app
 EXPOSE 8000

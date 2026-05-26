@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 COMPOSE := docker compose -f infra/docker-compose.yml --env-file .env
 
-.PHONY: env up down logs ps migrate seed ingest api web fmt test train backtest
+.PHONY: env up down logs ps migrate seed ingest api web fmt test train backtest demo
 
 env:
 	@[ -f .env ] || (cp .env.example .env && echo "created .env — fill in API keys")
@@ -50,3 +50,6 @@ train:
 
 backtest:
 	python -m scripts.backtest
+
+demo:
+	python -m scripts.demo
